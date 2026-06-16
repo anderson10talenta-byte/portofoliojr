@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Richard Juan Portfolio CMS</title>
+    <meta name="description" content="Richard Juan portfolio website with full CMS." />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to main content</a>
+    <header class="nav">
+      <button class="brand" data-scroll="#top">RICHARD JUAN</button>
+      <nav class="nav-links" aria-label="Primary">
+        <button data-scroll="#work">Work</button>
+        <button data-scroll="#services">Services</button>
+        <button data-scroll="#about">About</button>
+        <button data-scroll="#process">Process</button>
+        <button data-scroll="#contact">Contact</button>
+        <a class="nav-cta" href="/admin.html">CMS Admin</a>
+      </nav>
+      <button class="menu-button" id="menuButton" aria-label="Open menu" aria-expanded="false">☰</button>
+    </header>
+
+    <div class="mobile-menu" id="mobileMenu" hidden>
+      <button data-scroll="#work">Work</button>
+      <button data-scroll="#services">Services</button>
+      <button data-scroll="#about">About</button>
+      <button data-scroll="#process">Process</button>
+      <button data-scroll="#contact">Contact</button>
+      <a href="/admin.html">CMS Admin</a>
+    </div>
+
+    <main id="main">
+      <section id="top" class="hero">
+        <div class="hero-noise"></div>
+        <div class="hero-content">
+          <p class="availability">Available for selected projects</p>
+          <h1 id="heroTitle">Richard Juan</h1>
+          <p id="heroSubtitle" class="hero-subtitle">Videographer, photographer, and content strategist in Bandung.</p>
+          <div class="hero-actions">
+            <a class="primary-cta" href="#work">View Work <span>→</span></a>
+            <a class="secondary-cta" href="#contact">Start a Project <span>→</span></a>
+          </div>
+          <div class="stats">
+            <div><strong>5+</strong><span>Years creating</span></div>
+            <div><strong>60+</strong><span>Visual assets</span></div>
+            <div><strong>End-to-end</strong><span>Creative support</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="clients" class="section clients-section">
+        <p class="section-label">Companies & Clients</p>
+        <div id="companies" class="client-row"></div>
+      </section>
+
+      <section id="selected" class="section">
+        <div class="section-heading">
+          <p class="section-label">Selected Work</p>
+          <a href="#work">View all work →</a>
+        </div>
+        <div id="featuredGrid" class="work-grid featured-grid"></div>
+      </section>
+
+      <section id="services" class="section">
+        <p class="section-label">Services</p>
+        <div class="service-grid">
+          <article><span>01</span><h2>Videography</h2><p>Cinematic production for brands, events, documentaries, and campaigns.</p><a href="#contact">Learn more →</a></article>
+          <article><span>02</span><h2>Photography</h2><p>Commercial, portrait, product, and event photography with clear intent.</p><a href="#contact">Learn more →</a></article>
+          <article><span>03</span><h2>Graphic Design</h2><p>Visual identity, branding, and marketing materials that communicate clearly.</p><a href="#contact">Learn more →</a></article>
+          <article><span>04</span><h2>Social Media Content</h2><p>Short-form strategy and production tailored for every platform.</p><a href="#contact">Learn more →</a></article>
+        </div>
+      </section>
+
+      <section id="work" class="section">
+        <p class="section-label">Portfolio</p>
+        <div id="filters" class="filters"></div>
+        <div id="workGrid" class="work-grid"></div>
+      </section>
+
+      <section id="about" class="section about-grid">
+        <div class="portrait-card"></div>
+        <div>
+          <p class="section-label">About Me</p>
+          <h2 id="aboutTitle">I'm Richard Juan.</h2>
+          <p id="aboutBody">A visual storyteller based in Bandung. I help brands and individuals communicate their message through purposeful visuals and strategic content.</p>
+          <p>With 5+ years of experience, I combine creativity with strategy to deliver content that looks good and works hard.</p>
+        </div>
+      </section>
+
+      <section id="process" class="section">
+        <p class="section-label">Process</p>
+        <div class="process-grid">
+          <article><span>01</span><h3>Discover</h3><p>We discuss your goals, audience, and key message.</p></article>
+          <article><span>02</span><h3>Plan</h3><p>We shape the concept, strategy, and creative direction.</p></article>
+          <article><span>03</span><h3>Produce</h3><p>We create with intention and attention to every detail.</p></article>
+          <article><span>04</span><h3>Deliver</h3><p>We deliver polished content ready to make an impact.</p></article>
+          <article><span>05</span><h3>Grow</h3><p>We review the result and refine for long-term growth.</p></article>
+        </div>
+      </section>
+
+      <section id="contact" class="section contact-card">
+        <div>
+          <p class="section-label">Let's Work Together</p>
+          <h2>Have a project in mind?</h2>
+          <p>Tell me what you are building. We can discuss visual direction, scope, and production plan directly.</p>
+          <p id="location"></p>
+        </div>
+        <div class="contact-actions">
+          <a id="whatsappLink" class="primary-cta" href="#">WhatsApp →</a>
+          <a id="emailLink" class="secondary-cta" href="#">Email →</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <button data-scroll="#top">© <span id="year"></span> Richard Juan. All rights reserved.</button>
+      <a href="/admin.html">CMS Admin</a>
+    </footer>
+
+    <dialog id="mediaDialog">
+      <button id="closeDialog" class="dialog-close" aria-label="Close">×</button>
+      <img id="dialogImage" alt="" />
+      <h2 id="dialogTitle"></h2>
+      <p id="dialogDescription"></p>
+    </dialog>
+
+    <script src="/site.js"></script>
+  </body>
+</html>

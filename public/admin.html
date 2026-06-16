@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CMS Admin - Richard Juan</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body class="admin-body">
+    <header class="admin-topbar">
+      <a class="brand" href="/">RICHARD JUAN</a>
+      <a class="nav-cta" href="/">View Site</a>
+    </header>
+
+    <main class="admin-layout">
+      <section id="loginPanel" class="admin-panel login-panel">
+        <p class="section-label">CMS Login</p>
+        <h1>Manage portfolio content.</h1>
+        <p>Default admin: <code>adminrichardjuan@gmail.com</code> / <code>PersonalBranding10</code>. Change it with `ADMIN_EMAIL` and `ADMIN_PASSWORD` in production.</p>
+        <form id="loginForm">
+          <label for="password">Admin password</label>
+          <input id="password" type="password" required autocomplete="current-password" />
+          <button class="primary-cta" type="submit">Open CMS</button>
+          <p id="loginMessage" class="form-message" role="alert"></p>
+        </form>
+      </section>
+
+      <section id="cmsPanel" class="admin-grid" hidden>
+        <form id="settingsForm" class="admin-panel">
+          <p class="section-label">Site Settings</p>
+          <h2>Homepage copy</h2>
+          <label>Hero title<input name="heroTitle" required /></label>
+          <label>Hero subtitle<textarea name="heroSubtitle" rows="3"></textarea></label>
+          <label>About title<input name="aboutTitle" /></label>
+          <label>About body<textarea name="aboutBody" rows="4"></textarea></label>
+          <label>Email<input name="email" type="email" /></label>
+          <label>WhatsApp phone<input name="phone" /></label>
+          <label>Location<input name="location" /></label>
+          <button class="primary-cta" type="submit">Save Settings</button>
+        </form>
+
+        <form id="mediaForm" class="admin-panel">
+          <p class="section-label">Portfolio CMS</p>
+          <h2>Add project</h2>
+          <label>Title<input name="title" required /></label>
+          <label>Category<input name="category" required placeholder="Videography" /></label>
+          <label>Type
+            <select name="type">
+              <option value="image">Image</option>
+              <option value="video">Video</option>
+            </select>
+          </label>
+          <label>Thumbnail URL<input name="thumbnailUrl" placeholder="https://..." /></label>
+          <label>Project URL<input name="url" placeholder="https://..." /></label>
+          <label>Description<textarea name="description" rows="4"></textarea></label>
+          <label class="checkbox-row"><input name="featured" type="checkbox" /> Featured work</label>
+          <button class="primary-cta" type="submit">Add Project</button>
+        </form>
+
+        <form id="categoryForm" class="admin-panel">
+          <p class="section-label">Categories</p>
+          <h2>Portfolio filters</h2>
+          <label>One category per line<textarea name="categories" rows="8"></textarea></label>
+          <button class="secondary-cta" type="submit">Save Categories</button>
+        </form>
+
+        <form id="companyForm" class="admin-panel">
+          <p class="section-label">Clients</p>
+          <h2>Add client</h2>
+          <label>Name<input name="name" required /></label>
+          <label>Website URL<input name="websiteUrl" /></label>
+          <label>Logo URL<input name="logoUrl" /></label>
+          <button class="secondary-cta" type="submit">Add Client</button>
+        </form>
+
+        <section class="admin-panel wide-panel">
+          <div class="section-heading">
+            <div>
+              <p class="section-label">Published Projects</p>
+              <h2>Current portfolio</h2>
+            </div>
+            <p id="saveMessage" class="form-message" aria-live="polite"></p>
+          </div>
+          <div id="adminMediaList" class="admin-list"></div>
+        </section>
+
+        <section class="admin-panel wide-panel">
+          <p class="section-label">Client List</p>
+          <div id="adminCompanyList" class="admin-list"></div>
+        </section>
+      </section>
+    </main>
+
+    <script src="/admin.js"></script>
+  </body>
+</html>

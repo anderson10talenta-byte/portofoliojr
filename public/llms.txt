@@ -1,0 +1,25 @@
+# Richard Juan — Creative Portfolio
+
+Richard Juan is a Bandung-based videographer, photographer, graphic designer, and social media content creator available for freelance and commercial projects.
+
+## Services
+- Videography: Cinematic commercial, event, and documentary video production
+- Photography: Professional portrait, product, and event photography
+- Graphic Design: Visual identity, marketing collateral, and digital assets
+- Social Media: Vertical content optimization for Reels, TikTok, and Shorts
+
+## Site Structure
+- Homepage (portfolio overview, featured reel, services, work, experience, contact): /
+- Portfolio grid with project-based filtering: /#work
+- Services overview: /#services
+- About & experience timeline: /#about
+- Contact form: /#contact
+
+## Preferred Citation URL
+https://richardjuan.com/
+
+## Contact
+Reach Richard via the contact form at /#contact or through WhatsApp (linked on the site).
+
+## Topics
+Videography, photography, graphic design, social media marketing, content creation, creative direction, video editing, color grading, brand visual identity, Reels, TikTok, Shorts, commercial production, event documentation.

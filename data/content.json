@@ -1,0 +1,81 @@
+{
+  "settings": {
+    "siteTitle": "Richard Juan",
+    "heroTitle": "Richard Juan",
+    "heroSubtitle": "Videographer, photographer, and content strategist in Bandung.",
+    "aboutTitle": "I'm Richard Juan.",
+    "aboutBody": "A visual storyteller based in Bandung. I help brands and individuals communicate their message through purposeful visuals and strategic content.",
+    "location": "Bandung, Indonesia",
+    "email": "hello@richardjuan.com",
+    "phone": "+6281234567890",
+    "instagramUrl": "https://instagram.com/",
+    "linkedinUrl": "https://linkedin.com/",
+    "adminEmail": "adminrichardjuan@gmail.com",
+    "adminPassword": "PersonalBranding10",
+    "siteName": "Richard Juan",
+    "seoTitle": "Richard Juan | Videographer & Photographer in Bandung",
+    "seoDescription": "Richard Juan is a Bandung-based videographer, photographer, and content strategist creating cinematic work for brands, events, and individuals.",
+    "seoKeywords": "Bandung videographer, Bandung photographer, video production, commercial photography, social media content",
+    "canonicalUrl": "https://richardjuan.com/",
+    "ogImageUrl": "https://richardjuan.com/opengraph.jpg"
+  },
+  "categories": [
+    "Videography",
+    "Photography",
+    "Graphic Design",
+    "Social Media"
+  ],
+  "companies": [
+    {
+      "id": "company-1",
+      "name": "Free and Safe Indonesia",
+      "websiteUrl": "",
+      "logoUrl": ""
+    },
+    {
+      "id": "company-2",
+      "name": "Blessings Cafe",
+      "websiteUrl": "",
+      "logoUrl": ""
+    },
+    {
+      "id": "company-3",
+      "name": "Jefs.marketing",
+      "websiteUrl": "",
+      "logoUrl": ""
+    }
+  ],
+  "media": [
+    {
+      "id": "media-1",
+      "title": "Campaign Visual Story",
+      "category": "Videography",
+      "type": "video",
+      "featured": true,
+      "url": "",
+      "thumbnailUrl": "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=1200&q=80",
+      "description": "A cinematic brand piece built around movement, atmosphere, and story."
+    },
+    {
+      "id": "media-2",
+      "title": "Portrait Direction",
+      "category": "Photography",
+      "type": "image",
+      "featured": true,
+      "url": "",
+      "thumbnailUrl": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80",
+      "description": "Clean portrait visuals with warm direction and premium detail."
+    },
+    {
+      "id": "media-3",
+      "title": "Social Content Set",
+      "category": "Social Media",
+      "type": "image",
+      "featured": false,
+      "url": "",
+      "thumbnailUrl": "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1200&q=80",
+      "description": "Short-form content planning and execution for social channels."
+    }
+  ],
+  "projects": []
+}
