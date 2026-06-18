@@ -15,6 +15,10 @@ const uploadDir = path.join(__dirname, "public", "uploads");
 const port = Number(process.env.PORT || 4173);
 const sessions = new Set();
 const databaseUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL || "";
+const supabaseUrl = (process.env.SUPABASE_URL || "").replace(/\/$/, "");
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+const supabaseStorageBucket = process.env.SUPABASE_STORAGE_BUCKET || "portfolio-uploads";
+const productionMode = process.env.NODE_ENV === "production" || Boolean(process.env.VERCEL);
 const pool = databaseUrl
   ? new Pool({
       connectionString: databaseUrl,
@@ -34,6 +38,10 @@ const mime = {
   ".gif": "image/gif",
   ".svg": "image/svg+xml"
 };
+
+function mimeFromFilename(filename) {
+  return mime[path.extname(filename).toLowerCase()] || "application/octet-stream";
+}
 
 async function readJsonContent() {
   return JSON.parse(await readFile(dataPath, "utf8"));
@@ -463,12 +471,43 @@ async function saveUpload(req) {
   const raw = body.toString("binary");
   const start = raw.indexOf("\r\n\r\n");
   const filenameMatch = raw.slice(0, start).match(/filename="([^"]+)"/);
+  const contentTypeMatch = raw.slice(0, start).match(/content-type:\s*([^\r\n]+)/i);
   if (start === -1 || !filenameMatch) return null;
 
   const original = filenameMatch[1].replace(/[^a-z0-9._-]/gi, "-").toLowerCase();
   const end = raw.indexOf(`\r\n${boundary}`, start + 4);
+  if (end === -1) return null;
   const fileBuffer = body.subarray(start + 4, end);
   const filename = `${Date.now()}-${original}`;
+  const contentType = contentTypeMatch?.[1]?.trim() || mimeFromFilename(filename);
+
+  if (supabaseUrl && supabaseServiceRoleKey) {
+    const objectPath = `uploads/${filename}`;
+    const encodedObjectPath = objectPath.split("/").map(encodeURIComponent).join("/");
+    const uploadUrl = `${supabaseUrl}/storage/v1/object/${supabaseStorageBucket}/${encodedObjectPath}`;
+    const response = await fetch(uploadUrl, {
+      method: "POST",
+      headers: {
+        apikey: supabaseServiceRoleKey,
+        authorization: `Bearer ${supabaseServiceRoleKey}`,
+        "content-type": contentType,
+        "x-upsert": "true"
+      },
+      body: fileBuffer
+    });
+
+    if (!response.ok) {
+      const details = await response.text().catch(() => "");
+      throw new Error(`Supabase Storage upload failed: ${response.status} ${details}`);
+    }
+
+    return `${supabaseUrl}/storage/v1/object/public/${supabaseStorageBucket}/${objectPath}`;
+  }
+
+  if (productionMode) {
+    throw new Error("SUPABASE_SERVICE_ROLE_KEY is required for production uploads");
+  }
+
   const destination = path.join(uploadDir, filename);
 
   await mkdir(uploadDir, { recursive: true });
@@ -603,8 +642,8 @@ export async function router(req, res) {
     if (req.method === "GET" && pathname === "/api/integrations/status") {
       send(res, 200, {
         databaseConnected: Boolean(pool),
-        storageConfigured: false,
-        storageBucket: "local uploads",
+        storageConfigured: Boolean(supabaseUrl && supabaseServiceRoleKey),
+        storageBucket: supabaseUrl && supabaseServiceRoleKey ? supabaseStorageBucket : "local uploads",
         mode: pool ? "supabasePostgres" : "localCms"
       });
       return;

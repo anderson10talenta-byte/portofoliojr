@@ -11,6 +11,7 @@ Folder ini berisi semua bagian website dalam satu tempat: source React, admin da
 - Toggle featured work dan homepage content
 - Edit kategori filter portfolio
 - Data CMS tersimpan di Supabase/Postgres saat `DATABASE_URL` tersedia
+- Upload production tersimpan di Supabase Storage bucket `portfolio-uploads`
 - Fallback lokal ke `data/content.json` kalau database belum dinyalakan
 - Supabase migrations + seed ada di folder `supabase/`
 
@@ -92,6 +93,8 @@ ADMIN_PASSWORD=your-secure-password
 SUPABASE_PROJECT_REF=ndbytpnjjodsyizpzpfj
 SUPABASE_URL=https://ndbytpnjjodsyizpzpfj.supabase.co
 SUPABASE_ANON_KEY=sb_publishable_yG8J4W5gu3KtY5vhCkZoTQ_yVI6vIO-
+SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
+SUPABASE_STORAGE_BUCKET=portfolio-uploads
 ```
 
 Untuk apply schema ke Supabase hosted:
@@ -117,4 +120,4 @@ App ini siap di-import ke Vercel sebagai project Vite:
 - Output directory: `dist/public`
 - API routes: handled by `api/index.js`
 
-Catatan penting: set `DATABASE_URL` di Vercel supaya perubahan admin dashboard tersimpan permanen di Supabase/Postgres. Kalau `DATABASE_URL` kosong, server akan fallback ke `data/content.json`, tetapi perubahan JSON itu tidak permanen di serverless. Upload file saat ini masih memakai local `/public/uploads`; untuk production file upload permanen, lanjutkan dengan Supabase Storage memakai bucket `portfolio-uploads` yang sudah dibuat di migration.
+Catatan penting: set `DATABASE_URL` di Vercel supaya perubahan admin dashboard tersimpan permanen di Supabase/Postgres. Set `SUPABASE_SERVICE_ROLE_KEY` supaya upload admin dashboard tersimpan permanen ke Supabase Storage. Kalau `DATABASE_URL` kosong, server akan fallback ke `data/content.json`, tetapi perubahan JSON itu tidak permanen di serverless.
