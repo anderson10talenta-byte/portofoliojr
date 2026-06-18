@@ -19,6 +19,7 @@ const supabaseUrl = (process.env.SUPABASE_URL || "").replace(/\/$/, "");
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 const supabaseStorageBucket = process.env.SUPABASE_STORAGE_BUCKET || "portfolio-uploads";
 const productionMode = process.env.NODE_ENV === "production" || Boolean(process.env.VERCEL);
+const adminSessionHours = Number(process.env.ADMIN_SESSION_HOURS || 2);
 const pool = databaseUrl
   ? new Pool({
       connectionString: databaseUrl,
@@ -272,9 +273,9 @@ async function createAdminSession(token) {
   if (pool) {
     await pool.query(
       `insert into public.admin_sessions (token, expires_at)
-       values ($1, now() + interval '7 days')
+       values ($1, now() + ($2::text || ' hours')::interval)
        on conflict (token) do update set expires_at = excluded.expires_at`,
-      [token]
+      [token, Number.isFinite(adminSessionHours) ? adminSessionHours : 2]
     );
   }
 }
@@ -299,9 +300,8 @@ async function deleteAdminSession(token) {
 }
 
 async function isAdmin(req, content) {
-  const expected = process.env.ADMIN_PASSWORD || content.settings.adminPassword;
   const token = getCookie(req, "portfolio_admin");
-  return req.headers["x-admin-password"] === expected || hasAdminSession(token);
+  return hasAdminSession(token);
 }
 
 function credentialsMatch(content, email, password) {
@@ -313,11 +313,14 @@ function credentialsMatch(content, email, password) {
 }
 
 function setAdminCookie(res, token) {
-  res.setHeader("set-cookie", `portfolio_admin=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=604800`);
+  const maxAge = Math.max(300, Math.floor((Number.isFinite(adminSessionHours) ? adminSessionHours : 2) * 3600));
+  const secure = productionMode ? "; Secure" : "";
+  res.setHeader("set-cookie", `portfolio_admin=${token}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${maxAge}${secure}`);
 }
 
 function clearAdminCookie(res) {
-  res.setHeader("set-cookie", "portfolio_admin=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0");
+  const secure = productionMode ? "; Secure" : "";
+  res.setHeader("set-cookie", `portfolio_admin=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0${secure}`);
 }
 
 function getId() {

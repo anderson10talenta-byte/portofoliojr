@@ -4,6 +4,7 @@ import {
   LayoutDashboard, Video, Image as ImageIcon, FolderKanban, PenTool, LogOut, Loader2, Settings2, Building2, Tags,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AdminLoginModal } from "@/components/admin/AdminLoginModal";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -21,11 +22,11 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
         if (d.isAdmin) {
           setIsAdmin(true);
         } else {
-          window.location.href = "/";
+          setIsAdmin(false);
         }
       })
       .catch(() => {
-        window.location.href = "/";
+        setIsAdmin(false);
       });
   }, []);
 
@@ -41,6 +42,14 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
           <Loader2 className="w-12 h-12 text-primary animate-spin" />
           <p className="text-muted-foreground font-medium">Authenticating...</p>
         </div>
+      </div>
+    );
+  }
+
+  if (isAdmin === false) {
+    return (
+      <div className="min-h-screen bg-background">
+        <AdminLoginModal open onClose={() => { window.location.href = "/"; }} />
       </div>
     );
   }

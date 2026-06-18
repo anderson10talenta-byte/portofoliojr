@@ -90,6 +90,7 @@ DATABASE_URL=your-supabase-transaction-pooler-or-postgres-connection-string
 DATABASE_SSL=true
 ADMIN_EMAIL=your-email@example.com
 ADMIN_PASSWORD=your-secure-password
+ADMIN_SESSION_HOURS=2
 SUPABASE_PROJECT_REF=ndbytpnjjodsyizpzpfj
 SUPABASE_URL=https://ndbytpnjjodsyizpzpfj.supabase.co
 SUPABASE_ANON_KEY=sb_publishable_yG8J4W5gu3KtY5vhCkZoTQ_yVI6vIO-
