@@ -7,3 +7,4 @@ dist/
 ._*
 *.log
 .vercel/
+.vercel
