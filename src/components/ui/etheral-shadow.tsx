@@ -45,6 +45,9 @@ const useInstanceId = (): string => {
   return `shadowoverlay-${id.replace(/:/g, '')}`;
 };
 
+const maskUrl = `url('${import.meta.env.BASE_URL}images/ethereal-mask.png')`;
+const noiseUrl = `url('${import.meta.env.BASE_URL}images/ethereal-noise.png')`;
+
 export function Component({
   sizing = 'fill',
   color = 'rgba(128, 128, 128, 1)',
@@ -134,8 +137,8 @@ export function Component({
         <div
           style={{
             backgroundColor: color,
-            maskImage: `url('${import.meta.env.BASE_URL}images/ethereal-mask.png')`,
-            WebkitMaskImage: `url('${import.meta.env.BASE_URL}images/ethereal-mask.png')`,
+            maskImage: maskUrl,
+            WebkitMaskImage: maskUrl,
             maskSize: sizing === 'stretch' ? '100% 100%' : 'cover',
             WebkitMaskSize: sizing === 'stretch' ? '100% 100%' : 'cover',
             maskRepeat: 'no-repeat',
@@ -145,6 +148,20 @@ export function Component({
           }}
         />
       </div>
+
+      <div
+        className="absolute inset-0"
+        style={{
+          backgroundColor: color,
+          backgroundImage: maskUrl,
+          backgroundSize: sizing === 'stretch' ? '100% 100%' : 'cover',
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'center',
+          backgroundBlendMode: 'screen',
+          filter: 'blur(10px)',
+          opacity: 0.48,
+        }}
+      />
 
       {showTitle && (
         <div
@@ -168,7 +185,7 @@ export function Component({
           style={{
             position: 'absolute',
             inset: 0,
-            backgroundImage: `url('${import.meta.env.BASE_URL}images/ethereal-noise.png')`,
+            backgroundImage: noiseUrl,
             backgroundSize: noise.scale * 200,
             backgroundRepeat: 'repeat',
             opacity: noise.opacity / 2,
