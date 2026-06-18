@@ -61,25 +61,27 @@ export function Component({
   const animationDuration = animation ? mapRange(animation.speed, 1, 100, 1000, 50) : 1;
 
   useEffect(() => {
-    if (feColorMatrixRef.current && animationEnabled) {
-      hueRotateAnimation.current?.stop();
-      hueRotateMotionValue.set(0);
-      hueRotateAnimation.current = animate(hueRotateMotionValue, 360, {
-        duration: animationDuration / 25,
-        repeat: Infinity,
-        repeatType: 'loop',
-        repeatDelay: 0,
-        ease: 'linear',
-        delay: 0,
-        onUpdate: (value: number) => {
-          feColorMatrixRef.current?.setAttribute('values', String(value));
-        },
-      });
-
-      return () => {
-        hueRotateAnimation.current?.stop();
-      };
+    if (!feColorMatrixRef.current || !animationEnabled) {
+      return undefined;
     }
+
+    hueRotateAnimation.current?.stop();
+    hueRotateMotionValue.set(0);
+    hueRotateAnimation.current = animate(hueRotateMotionValue, 360, {
+      duration: animationDuration / 25,
+      repeat: Infinity,
+      repeatType: 'loop',
+      repeatDelay: 0,
+      ease: 'linear',
+      delay: 0,
+      onUpdate: (value: number) => {
+        feColorMatrixRef.current?.setAttribute('values', String(value));
+      },
+    });
+
+    return () => {
+      hueRotateAnimation.current?.stop();
+    };
   }, [animationEnabled, animationDuration, hueRotateMotionValue]);
 
   return (
@@ -155,4 +157,3 @@ export function Component({
     </div>
   );
 }
-

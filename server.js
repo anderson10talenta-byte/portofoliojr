@@ -4,6 +4,7 @@ import { createWriteStream } from "node:fs";
 import crypto from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { Pool } from "pg";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const dataPath = path.join(__dirname, "data", "content.json");
@@ -13,6 +14,13 @@ const publicDir = process.env.PUBLIC_DIR
 const uploadDir = path.join(__dirname, "public", "uploads");
 const port = Number(process.env.PORT || 4173);
 const sessions = new Set();
+const databaseUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL || "";
+const pool = databaseUrl
+  ? new Pool({
+      connectionString: databaseUrl,
+      ssl: process.env.DATABASE_SSL === "true" ? { rejectUnauthorized: false } : undefined
+    })
+  : null;
 
 const mime = {
   ".html": "text/html; charset=utf-8",
@@ -27,11 +35,194 @@ const mime = {
   ".svg": "image/svg+xml"
 };
 
-async function readContent() {
+async function readJsonContent() {
   return JSON.parse(await readFile(dataPath, "utf8"));
 }
 
+function publicId(id) {
+  const numeric = Number(id);
+  return Number.isInteger(numeric) && String(numeric) === String(id) ? numeric : id;
+}
+
+function dateValue(value) {
+  if (!value) return new Date(0).toISOString();
+  return value instanceof Date ? value.toISOString() : new Date(value).toISOString();
+}
+
+function toArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function categoryFromRow(row) {
+  return {
+    id: publicId(row.id),
+    name: row.name,
+    type: row.type,
+    createdAt: dateValue(row.created_at)
+  };
+}
+
+function companyFromRow(row) {
+  return {
+    id: publicId(row.id),
+    name: row.name,
+    logoUrl: row.logo_url || "",
+    websiteUrl: row.website_url || "",
+    sortOrder: row.sort_order ?? 0,
+    active: row.active !== false,
+    createdAt: dateValue(row.created_at)
+  };
+}
+
+function projectFromRow(row) {
+  return {
+    id: publicId(row.id),
+    title: row.title,
+    description: row.description,
+    category: row.category,
+    clientName: row.client_name,
+    tags: toArray(row.tags),
+    featured: row.featured === true,
+    showOnHomepage: row.show_on_homepage === true,
+    thumbnailUrl: row.thumbnail_url,
+    createdAt: dateValue(row.created_at)
+  };
+}
+
+function mediaFromRow(row) {
+  return {
+    id: publicId(row.id),
+    projectId: row.project_id ? publicId(row.project_id) : null,
+    type: row.type,
+    url: row.url,
+    thumbnailUrl: row.thumbnail_url,
+    galleryUrls: toArray(row.gallery_urls),
+    title: row.title,
+    description: row.description,
+    category: row.category,
+    featured: row.featured === true,
+    createdAt: dateValue(row.created_at)
+  };
+}
+
+async function readContent() {
+  if (!pool) return readJsonContent();
+
+  const fallback = await readJsonContent();
+  const [settings, categories, companies, projects, media] = await Promise.all([
+    pool.query("select data from public.site_settings where id = 1"),
+    pool.query("select * from public.portfolio_categories order by created_at asc, name asc"),
+    pool.query("select * from public.companies order by sort_order asc, created_at asc"),
+    pool.query("select * from public.projects order by created_at desc"),
+    pool.query("select * from public.media order by created_at desc")
+  ]);
+
+  return {
+    settings: settings.rows[0]?.data || fallback.settings,
+    categories: categories.rows.map(categoryFromRow),
+    companies: companies.rows.map(companyFromRow),
+    projects: projects.rows.map(projectFromRow),
+    media: media.rows.map(mediaFromRow)
+  };
+}
+
 async function writeContent(content) {
+  if (pool) {
+    const client = await pool.connect();
+    try {
+      await client.query("begin");
+      await client.query(
+        `insert into public.site_settings (id, data, updated_at)
+         values (1, $1::jsonb, now())
+         on conflict (id) do update set data = excluded.data, updated_at = now()`,
+        [JSON.stringify(content.settings || {})]
+      );
+
+      await client.query("delete from public.media");
+      await client.query("delete from public.projects");
+      await client.query("delete from public.portfolio_categories");
+      await client.query("delete from public.companies");
+
+      for (const category of normalizedCategories(content)) {
+        await client.query(
+          `insert into public.portfolio_categories (id, name, type, created_at)
+           values ($1, $2, $3, $4)`,
+          [
+            String(category.id),
+            category.name,
+            category.type || "all",
+            category.createdAt || new Date().toISOString()
+          ]
+        );
+      }
+
+      for (const company of normalizedCompanies(content)) {
+        await client.query(
+          `insert into public.companies (id, name, logo_url, website_url, sort_order, active, created_at)
+           values ($1, $2, $3, $4, $5, $6, $7)`,
+          [
+            String(company.id),
+            company.name,
+            company.logoUrl || "",
+            company.websiteUrl || "",
+            company.sortOrder ?? 0,
+            company.active !== false,
+            company.createdAt || new Date().toISOString()
+          ]
+        );
+      }
+
+      for (const project of (content.projects || []).map(publicProject)) {
+        await client.query(
+          `insert into public.projects
+            (id, title, description, category, client_name, tags, featured, show_on_homepage, thumbnail_url, created_at)
+           values ($1, $2, $3, $4, $5, $6::jsonb, $7, $8, $9, $10)`,
+          [
+            String(project.id),
+            project.title,
+            project.description,
+            project.category,
+            project.clientName,
+            JSON.stringify(project.tags || []),
+            project.featured === true,
+            project.showOnHomepage === true,
+            project.thumbnailUrl,
+            project.createdAt || new Date().toISOString()
+          ]
+        );
+      }
+
+      for (const item of (content.media || []).map(publicMedia)) {
+        await client.query(
+          `insert into public.media
+            (id, project_id, type, url, thumbnail_url, gallery_urls, title, description, category, featured, created_at)
+           values ($1, $2, $3, $4, $5, $6::jsonb, $7, $8, $9, $10, $11)`,
+          [
+            String(item.id),
+            item.projectId == null ? null : String(item.projectId),
+            storedType(item.type),
+            item.url || "",
+            item.thumbnailUrl,
+            JSON.stringify(item.galleryUrls || []),
+            item.title,
+            item.description,
+            item.category,
+            item.featured === true,
+            item.createdAt || new Date().toISOString()
+          ]
+        );
+      }
+
+      await client.query("commit");
+      return;
+    } catch (error) {
+      await client.query("rollback");
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
   await writeFile(dataPath, `${JSON.stringify(content, null, 2)}\n`);
 }
 
@@ -68,10 +259,41 @@ function getCookie(req, name) {
     .find(([key]) => key === name)?.[1];
 }
 
-function isAdmin(req, content) {
+async function createAdminSession(token) {
+  sessions.add(token);
+  if (pool) {
+    await pool.query(
+      `insert into public.admin_sessions (token, expires_at)
+       values ($1, now() + interval '7 days')
+       on conflict (token) do update set expires_at = excluded.expires_at`,
+      [token]
+    );
+  }
+}
+
+async function hasAdminSession(token) {
+  if (!token) return false;
+  if (sessions.has(token)) return true;
+  if (!pool) return false;
+
+  const result = await pool.query(
+    "select token from public.admin_sessions where token = $1 and expires_at > now()",
+    [token]
+  );
+  if (result.rowCount > 0) sessions.add(token);
+  return result.rowCount > 0;
+}
+
+async function deleteAdminSession(token) {
+  if (!token) return;
+  sessions.delete(token);
+  if (pool) await pool.query("delete from public.admin_sessions where token = $1", [token]);
+}
+
+async function isAdmin(req, content) {
   const expected = process.env.ADMIN_PASSWORD || content.settings.adminPassword;
   const token = getCookie(req, "portfolio_admin");
-  return req.headers["x-admin-password"] === expected || Boolean(token && sessions.has(token));
+  return req.headers["x-admin-password"] === expected || hasAdminSession(token);
 }
 
 function credentialsMatch(content, email, password) {
@@ -104,7 +326,7 @@ function getNextNumberId(items = []) {
 
 async function requireAdmin(req, res) {
   const content = await readContent();
-  if (!isAdmin(req, content)) {
+  if (!(await isAdmin(req, content))) {
     send(res, 401, { error: "Unauthorized" });
     return null;
   }
@@ -335,7 +557,7 @@ export async function router(req, res) {
 
     if (req.method === "GET" && pathname === "/api/admin/check") {
       const content = await readContent();
-      send(res, 200, { isAdmin: isAdmin(req, content) });
+      send(res, 200, { isAdmin: await isAdmin(req, content) });
       return;
     }
 
@@ -347,7 +569,7 @@ export async function router(req, res) {
         return;
       }
       const token = crypto.randomBytes(24).toString("hex");
-      sessions.add(token);
+      await createAdminSession(token);
       setAdminCookie(res, token);
       send(res, 200, { ok: true });
       return;
@@ -364,7 +586,7 @@ export async function router(req, res) {
       content.settings.adminPassword = password;
       await writeContent(content);
       const token = crypto.randomBytes(24).toString("hex");
-      sessions.add(token);
+      await createAdminSession(token);
       setAdminCookie(res, token);
       send(res, 200, { ok: true });
       return;
@@ -372,14 +594,19 @@ export async function router(req, res) {
 
     if (req.method === "POST" && pathname === "/api/admin/logout") {
       const token = getCookie(req, "portfolio_admin");
-      if (token) sessions.delete(token);
+      await deleteAdminSession(token);
       clearAdminCookie(res);
       send(res, 200, { ok: true });
       return;
     }
 
     if (req.method === "GET" && pathname === "/api/integrations/status") {
-      send(res, 200, { databaseConnected: false, storageConfigured: false, storageBucket: "local uploads", mode: "localCms" });
+      send(res, 200, {
+        databaseConnected: Boolean(pool),
+        storageConfigured: false,
+        storageBucket: "local uploads",
+        mode: pool ? "supabasePostgres" : "localCms"
+      });
       return;
     }
 
@@ -391,7 +618,7 @@ export async function router(req, res) {
         return;
       }
       const token = crypto.randomBytes(24).toString("hex");
-      sessions.add(token);
+      await createAdminSession(token);
       setAdminCookie(res, token);
       send(res, 200, { ok: true });
       return;
