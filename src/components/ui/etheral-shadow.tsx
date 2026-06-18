@@ -28,6 +28,8 @@ interface ShadowOverlayProps {
   color?: string;
   animation?: AnimationConfig;
   noise?: NoiseConfig;
+  showTitle?: boolean;
+  title?: string;
   style?: CSSProperties;
   className?: string;
 }
@@ -48,6 +50,8 @@ export function Component({
   color = 'rgba(128, 128, 128, 1)',
   animation,
   noise,
+  showTitle = true,
+  title = 'Etheral Shadows',
   style,
   className,
 }: ShadowOverlayProps) {
@@ -141,6 +145,23 @@ export function Component({
           }}
         />
       </div>
+
+      {showTitle && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            textAlign: 'center',
+            zIndex: 10,
+          }}
+        >
+          <h1 className="relative z-20 text-center text-6xl font-bold text-foreground md:text-7xl lg:text-8xl">
+            {title}
+          </h1>
+        </div>
+      )}
 
       {noise && noise.opacity > 0 && (
         <div

@@ -173,6 +173,7 @@ export default function Home() {
             animation={{ scale: 72, speed: 34 }}
             noise={{ opacity: 0.18, scale: 0.8 }}
             sizing="fill"
+            showTitle={false}
           />
           <div className="absolute inset-x-0 bottom-0 h-px bg-white/10" />
           <div className="relative mx-auto grid min-h-[760px] max-w-[1440px] items-center gap-16 px-6 pb-16 pt-28 md:min-h-[860px] md:px-12 lg:grid-cols-[1.06fr_0.94fr] lg:px-20">
