@@ -6,7 +6,6 @@ import {
   CalendarDays,
   Camera,
   CheckSquare,
-  ChevronDown,
   Film,
   Image as ImageIcon,
   Mail,
@@ -22,6 +21,7 @@ import { useListMedia, type Media } from "@workspace/api-client-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { MediaDetailModal } from "@/components/ui/MediaDetailModal";
+import InteractiveBentoGallery, { type BentoGalleryItem } from "@/components/ui/interactive-bento-gallery";
 import { Component as EtheralShadow } from "@/components/ui/etheral-shadow";
 import { CompaniesSlider } from "@/components/CompaniesSlider";
 import { applySeo, defaultSiteSettings, useSiteSettings } from "@/lib/siteSettings";
@@ -89,6 +89,30 @@ const workExperience = [
   },
 ];
 
+const bentoSpans = [
+  "sm:col-span-1 sm:row-span-3 md:col-span-1 md:row-span-3",
+  "sm:col-span-2 sm:row-span-2 md:col-span-2 md:row-span-2",
+  "sm:col-span-1 sm:row-span-2 md:col-span-1 md:row-span-3",
+  "sm:col-span-2 sm:row-span-2 md:col-span-2 md:row-span-2",
+  "sm:col-span-1 sm:row-span-3 md:col-span-1 md:row-span-3",
+  "sm:col-span-2 sm:row-span-2 md:col-span-2 md:row-span-2",
+  "sm:col-span-1 sm:row-span-2 md:col-span-1 md:row-span-3",
+  "sm:col-span-2 sm:row-span-2 md:col-span-2 md:row-span-2",
+] as const;
+
+function toBentoGalleryItems(items: Media[]): BentoGalleryItem[] {
+  return items.slice(0, 8).map((item, index) => ({
+    id: item.id,
+    type: item.type,
+    title: item.title,
+    desc: item.description || "Purposeful visual story for modern brands.",
+    url: item.url,
+    thumbnailUrl: item.thumbnailUrl || item.galleryUrls?.[0] || item.url,
+    span: bentoSpans[index % bentoSpans.length],
+    category: item.category,
+  }));
+}
+
 function PortfolioCard({ media, onOpen, featured = false }: { media: Media; onOpen: () => void; featured?: boolean }) {
   const image = media.thumbnailUrl || media.url;
   return (
@@ -153,11 +177,17 @@ export default function Home() {
   }, [filter, media]);
   const selectedMedia = useMemo(() => media.filter((item) => item.featured).slice(0, 4), [media]);
   const categoryCount = Math.max(portfolioCategories.length, 4);
+  const filteredBentoItems = useMemo(() => toBentoGalleryItems(filtered), [filtered]);
 
   const openMedia = (items: Media[], index: number) => {
     setModalItems(items);
     setModalIndex(index);
     setModalOpen(true);
+  };
+
+  const openBentoMedia = (item: BentoGalleryItem) => {
+    const index = filtered.findIndex((mediaItem) => mediaItem.id === item.id);
+    openMedia(filtered, Math.max(index, 0));
   };
 
   return (
@@ -279,20 +309,24 @@ export default function Home() {
                   ))}
                 </div>
               </div>
-              <button className="inline-flex h-11 items-center gap-3 rounded-full border border-white/10 px-5 text-xs text-white/50">Latest <ChevronDown className="h-3.5 w-3.5" /></button>
             </div>
             {mediaQuery.isLoading ? (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                {Array.from({ length: 8 }).map((_, index) => <div key={index} className="aspect-[4/2.85] animate-pulse rounded-[1.75rem] bg-white/5" />)}
+              <div className="grid auto-rows-[72px] gap-3 sm:grid-cols-3 md:grid-cols-4 md:auto-rows-[84px] lg:auto-rows-[92px]">
+                {Array.from({ length: 8 }).map((_, index) => (
+                  <div key={index} className={`animate-pulse rounded-[1.1rem] bg-white/5 ${bentoSpans[index % bentoSpans.length]}`} />
+                ))}
               </div>
             ) : mediaQuery.isError ? (
               <div className="border border-red-400/20 bg-red-400/5 px-6 py-14 text-center">
                 <p className="text-sm text-red-200/70">Portfolio content could not be loaded. Please try again shortly.</p>
               </div>
-            ) : filtered.length > 0 ? (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                {filtered.slice(0, 8).map((item, index) => <PortfolioCard key={item.id} media={item} onOpen={() => openMedia(filtered, index)} />)}
-              </div>
+            ) : filteredBentoItems.length > 0 ? (
+              <InteractiveBentoGallery
+                mediaItems={filteredBentoItems}
+                title={filter === "All" ? "A living wall of recent work." : `${filter} stories in motion.`}
+                description="Drag, scan, and tap into the work. The gallery keeps the portfolio tactile without losing the clean editorial feel."
+                onItemOpen={openBentoMedia}
+              />
             ) : (
               <div className="border border-white/10 bg-[#0d1212] px-6 py-14 text-center">
                 <p className="text-sm text-white/45">No published work is available for this category.</p>
