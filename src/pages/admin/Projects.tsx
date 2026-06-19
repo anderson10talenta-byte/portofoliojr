@@ -21,6 +21,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
+import { ConfirmActionDialog } from "@/components/admin/ConfirmActionDialog";
 
 const projectSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -37,6 +38,8 @@ type ProjectFormValues = z.infer<typeof projectSchema>;
 export default function Projects() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: number; title: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -111,15 +114,24 @@ export default function Projects() {
     }
   };
 
-  const handleDelete = (id: number) => {
-    if (confirm("Delete this project? Media items inside won't be deleted but will be detached.")) {
-      deleteProject({ id }, {
+  const handleDelete = () => {
+    if (!deleteTarget) return;
+    const previous = queryClient.getQueryData<typeof projects>(getListProjectsQueryKey());
+    queryClient.setQueryData<typeof projects>(getListProjectsQueryKey(), (current = []) => current.filter((item) => item.id !== deleteTarget.id));
+    setIsDeleting(true);
+    deleteProject({ id: deleteTarget.id }, {
         onSuccess: () => {
           toast({ title: "Project deleted" });
-          invalidateQueries();
-        }
+          setDeleteTarget(null);
+          queryClient.invalidateQueries({ queryKey: getGetDashboardStatsQueryKey() });
+          queryClient.invalidateQueries({ queryKey: getListProjectsQueryKey(), refetchType: "inactive" });
+        },
+        onError: (error: any) => {
+          queryClient.setQueryData(getListProjectsQueryKey(), previous);
+          toast({ title: "Delete failed", description: error?.message || "Please try again.", variant: "destructive" });
+        },
+        onSettled: () => setIsDeleting(false),
       });
-    }
   };
 
   return (
@@ -180,7 +192,7 @@ export default function Projects() {
                       <Button variant="ghost" size="icon" onClick={() => openEdit(item)} className="hover:bg-white/10 text-white">
                         <Edit2 className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleDelete(item.id)} className="hover:bg-destructive/20 text-destructive">
+                      <Button variant="ghost" size="icon" onClick={() => setDeleteTarget({ id: item.id, title: item.title })} className="hover:bg-destructive/20 text-destructive">
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
@@ -262,6 +274,15 @@ export default function Projects() {
           </form>
         </DialogContent>
       </Dialog>
+      <ConfirmActionDialog
+        open={Boolean(deleteTarget)}
+        title="Delete project?"
+        description={`"${deleteTarget?.title ?? "This project"}" will be deleted. Media items inside will stay in the CMS, but will be detached from this project.`}
+        confirmLabel="Delete project"
+        loading={isDeleting}
+        onOpenChange={(next) => !next && setDeleteTarget(null)}
+        onConfirm={handleDelete}
+      />
     </AdminLayout>
   );
 }

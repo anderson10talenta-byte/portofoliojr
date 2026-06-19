@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AdminLoginModal } from "@/components/admin/AdminLoginModal";
+import { checkAdminSession, clearAdminSessionCache, getCachedAdminState } from "@/lib/adminAuth";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -13,24 +14,20 @@ interface AdminLayoutProps {
 
 export function AdminLayout({ children, title }: AdminLayoutProps) {
   const [location] = useLocation();
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(getCachedAdminState());
 
   useEffect(() => {
-    fetch("/api/admin/check", { credentials: "include" })
-      .then((r) => r.json())
-      .then((d) => {
-        if (d.isAdmin) {
-          setIsAdmin(true);
-        } else {
-          setIsAdmin(false);
-        }
-      })
-      .catch(() => {
-        setIsAdmin(false);
-      });
+    let active = true;
+    checkAdminSession().then((result) => {
+      if (active) setIsAdmin(result);
+    });
+    return () => {
+      active = false;
+    };
   }, []);
 
   const handleLogout = async () => {
+    clearAdminSessionCache();
     await fetch("/api/admin/logout", { method: "POST", credentials: "include" });
     window.location.href = "/";
   };

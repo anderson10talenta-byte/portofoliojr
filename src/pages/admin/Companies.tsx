@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { useCompanies, type Company } from "@/lib/companies";
+import { ConfirmActionDialog } from "@/components/admin/ConfirmActionDialog";
 
 const emptyForm = { name: "", logoUrl: "", websiteUrl: "", sortOrder: "0", active: true };
 
@@ -18,6 +19,8 @@ export default function Companies() {
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<Company | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -63,11 +66,21 @@ export default function Companies() {
     } finally { setSaving(false); }
   };
 
-  const remove = async (company: Company) => {
-    if (!window.confirm(`Delete ${company.name}?`)) return;
-    const response = await fetch(`/api/companies/${company.id}`, { method: "DELETE", credentials: "include" });
-    if (response.ok) { await refresh(); toast({ title: "Company deleted" }); }
-    else toast({ title: "Delete failed", variant: "destructive" });
+  const remove = async () => {
+    if (!deleteTarget) return;
+    const previous = queryClient.getQueryData<Company[]>(["companies", true]);
+    queryClient.setQueryData<Company[]>(["companies", true], (current = []) => current.filter((item) => item.id !== deleteTarget.id));
+    setDeleting(true);
+    const response = await fetch(`/api/companies/${deleteTarget.id}`, { method: "DELETE", credentials: "include" });
+    if (response.ok) {
+      setDeleteTarget(null);
+      queryClient.invalidateQueries({ queryKey: ["companies"], refetchType: "inactive" });
+      toast({ title: "Company deleted" });
+    } else {
+      queryClient.setQueryData(["companies", true], previous);
+      toast({ title: "Delete failed", variant: "destructive" });
+    }
+    setDeleting(false);
   };
 
   const onFile = (event: ChangeEvent<HTMLInputElement>) => uploadLogo(event.target.files?.[0]);
@@ -91,7 +104,7 @@ export default function Companies() {
           {companies.map((company) => <article key={company.id} className="flex items-center gap-4 border border-border bg-card p-4">
             <div className="flex h-20 w-32 shrink-0 items-center justify-center bg-white p-3"><img src={company.logoUrl} alt={company.name} className="max-h-full max-w-full object-contain" /></div>
             <div className="min-w-0 flex-1"><h3 className="truncate font-semibold text-white">{company.name}</h3><p className="mt-1 text-xs text-muted-foreground">Order {company.sortOrder} · {company.active ? "Visible" : "Hidden"}</p>{company.websiteUrl && <p className="mt-1 truncate text-xs text-[#75b7bb]">{company.websiteUrl}</p>}</div>
-            <div className="flex gap-1"><Button variant="ghost" size="icon" onClick={() => edit(company)}><Edit2 className="h-4 w-4" /></Button><Button variant="ghost" size="icon" onClick={() => remove(company)} className="text-destructive"><Trash2 className="h-4 w-4" /></Button></div>
+            <div className="flex gap-1"><Button variant="ghost" size="icon" onClick={() => edit(company)}><Edit2 className="h-4 w-4" /></Button><Button variant="ghost" size="icon" onClick={() => setDeleteTarget(company)} className="text-destructive"><Trash2 className="h-4 w-4" /></Button></div>
           </article>)}
         </div>
       )}
@@ -107,6 +120,15 @@ export default function Companies() {
         </div>
         <DialogFooter><Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button><Button onClick={submit} disabled={saving || uploading} className="bg-primary font-bold text-black">{saving ? "Saving..." : "Save Company"}</Button></DialogFooter>
       </DialogContent></Dialog>
+      <ConfirmActionDialog
+        open={Boolean(deleteTarget)}
+        title="Delete company?"
+        description={`"${deleteTarget?.name ?? "This company"}" will be removed from the homepage company slider.`}
+        confirmLabel="Delete company"
+        loading={deleting}
+        onOpenChange={(next) => !next && setDeleteTarget(null)}
+        onConfirm={remove}
+      />
     </AdminLayout>
   );
 }

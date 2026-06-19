@@ -4,6 +4,7 @@ import { KeyRound, Loader2, Lock, Mail, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { setCachedAdminState } from "@/lib/adminAuth";
 
 interface AdminLoginModalProps { open: boolean; onClose: () => void }
 
@@ -30,6 +31,7 @@ export function AdminLoginModal({ open, onClose }: AdminLoginModalProps) {
       const response = await fetch(endpoint, { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify({ email, password }) });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || "Unable to sign in");
+      setCachedAdminState(true);
       onClose(); window.location.href = "/admin";
     } catch (error) {
       toast({ title: configured ? "Login failed" : "Setup failed", description: error instanceof Error ? error.message : "Please try again", variant: "destructive" });

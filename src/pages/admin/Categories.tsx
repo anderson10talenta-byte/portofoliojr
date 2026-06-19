@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { usePortfolioCategories } from "@/lib/categories";
+import { ConfirmActionDialog } from "@/components/admin/ConfirmActionDialog";
 
 const categoryTypes = [
   { value: "all", label: "All media" },
@@ -18,6 +19,8 @@ export default function Categories() {
   const [name, setName] = useState("");
   const [type, setType] = useState("all");
   const [saving, setSaving] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: number; name: string } | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const { data: categories = [], isLoading } = usePortfolioCategories();
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -48,14 +51,21 @@ export default function Categories() {
     }
   };
 
-  const deleteCategory = async (id: number) => {
-    const response = await fetch(`/api/categories/${id}`, { method: "DELETE", credentials: "include" });
+  const deleteCategory = async () => {
+    if (!deleteTarget) return;
+    const previous = queryClient.getQueryData<typeof categories>(["portfolio-categories"]);
+    queryClient.setQueryData<typeof categories>(["portfolio-categories"], (current = []) => current.filter((item) => item.id !== deleteTarget.id));
+    setDeleting(true);
+    const response = await fetch(`/api/categories/${deleteTarget.id}`, { method: "DELETE", credentials: "include" });
     if (response.ok) {
-      await refresh();
+      setDeleteTarget(null);
+      queryClient.invalidateQueries({ queryKey: ["portfolio-categories"], refetchType: "inactive" });
       toast({ title: "Portfolio category removed" });
     } else {
+      queryClient.setQueryData(["portfolio-categories"], previous);
       toast({ title: "Could not remove category", variant: "destructive" });
     }
+    setDeleting(false);
   };
 
   return (
@@ -101,7 +111,7 @@ export default function Categories() {
                   <p className="font-medium text-white">{category.name}</p>
                   <p className="mt-1 text-xs uppercase text-muted-foreground">{category.type === "all" ? "All media" : category.type}</p>
                 </div>
-                <button onClick={() => deleteCategory(category.id)} className="flex h-9 w-9 items-center justify-center text-destructive transition hover:bg-destructive/10" title="Delete category">
+                <button onClick={() => setDeleteTarget({ id: category.id, name: category.name })} className="flex h-9 w-9 items-center justify-center text-destructive transition hover:bg-destructive/10" title="Delete category">
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>
@@ -111,6 +121,15 @@ export default function Categories() {
           </div>
         </section>
       </div>
+      <ConfirmActionDialog
+        open={Boolean(deleteTarget)}
+        title="Delete category?"
+        description={`"${deleteTarget?.name ?? "This category"}" will be removed from the CMS filters. Existing media stays untouched.`}
+        confirmLabel="Delete category"
+        loading={deleting}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        onConfirm={deleteCategory}
+      />
     </AdminLayout>
   );
 }

@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { usePortfolioCategories } from "@/lib/categories";
+import { ConfirmActionDialog } from "@/components/admin/ConfirmActionDialog";
 
 const MAX_GALLERY_IMAGES = 6;
 
@@ -225,6 +226,8 @@ export function MediaManager({ type }: MediaManagerProps) {
   const [bulkProgressIdx, setBulkProgressIdx] = useState(-1);
   const [isDraggingBulk, setIsDraggingBulk] = useState(false);
   const bulkFileInputRef = useRef<HTMLInputElement>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: number; title: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const [isUploading, setIsUploading] = useState(false);
   const [uploadTitle, setUploadTitle] = useState("");
@@ -561,18 +564,28 @@ export function MediaManager({ type }: MediaManagerProps) {
     }
   };
 
-  const handleDelete = (id: number) => {
-    if (confirm("Are you sure you want to delete this item?")) {
-      deleteMedia(
-        { id },
-        {
-          onSuccess: () => {
-            toast({ title: "Deleted successfully" });
-            invalidateQueries();
-          },
+  const handleDelete = () => {
+    if (!deleteTarget) return;
+    const listKey = getListMediaQueryKey({ type });
+    const previous = queryClient.getQueryData<typeof mediaList>(listKey);
+    queryClient.setQueryData<typeof mediaList>(listKey, (current = []) => current.filter((item) => item.id !== deleteTarget.id));
+    setIsDeleting(true);
+    deleteMedia(
+      { id: deleteTarget.id },
+      {
+        onSuccess: () => {
+          toast({ title: "Deleted successfully" });
+          setDeleteTarget(null);
+          queryClient.invalidateQueries({ queryKey: getGetDashboardStatsQueryKey() });
+          queryClient.invalidateQueries({ queryKey: listKey, refetchType: "inactive" });
         },
-      );
-    }
+        onError: (error: any) => {
+          queryClient.setQueryData(listKey, previous);
+          toast({ title: "Delete failed", description: error?.message || "Please try again.", variant: "destructive" });
+        },
+        onSettled: () => setIsDeleting(false),
+      },
+    );
   };
 
   const toggleFeatured = (id: number, current: boolean) => {
@@ -752,7 +765,7 @@ export function MediaManager({ type }: MediaManagerProps) {
                       <Button variant="ghost" size="icon" onClick={() => openEdit(item)} className="hover:bg-white/10 text-white">
                         <Edit2 className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleDelete(item.id)} className="hover:bg-destructive/20 text-destructive">
+                      <Button variant="ghost" size="icon" onClick={() => setDeleteTarget({ id: item.id, title: item.title })} className="hover:bg-destructive/20 text-destructive">
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
@@ -1536,6 +1549,16 @@ export function MediaManager({ type }: MediaManagerProps) {
           </div>
         </DialogContent>
       </Dialog>
+
+      <ConfirmActionDialog
+        open={Boolean(deleteTarget)}
+        title={`Delete ${type}?`}
+        description={`"${deleteTarget?.title ?? "This item"}" will be permanently removed from the CMS. This action cannot be undone.`}
+        confirmLabel={`Delete ${type}`}
+        loading={isDeleting}
+        onOpenChange={(next) => !next && setDeleteTarget(null)}
+        onConfirm={handleDelete}
+      />
 
     </div>
   );
