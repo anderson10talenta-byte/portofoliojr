@@ -20,6 +20,7 @@ import {
 import { useListMedia, type Media } from "@workspace/api-client-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { BentoGrid, type BentoItem } from "@/components/ui/bento-grid";
 import { MediaDetailModal } from "@/components/ui/MediaDetailModal";
 import InteractiveBentoGallery, { type BentoGalleryItem } from "@/components/ui/interactive-bento-gallery";
 import { Component as EtheralShadow } from "@/components/ui/etheral-shadow";
@@ -29,12 +30,47 @@ import { usePortfolioCategories } from "@/lib/categories";
 
 const asset = (name: string) => `${import.meta.env.BASE_URL}images/${name}`;
 
-const services = [
-  [Video, "Videography", "Cinematic production for brands, events, documentaries, and campaigns."],
-  [Camera, "Photography", "Commercial, portrait, product, and event photography with clear intent."],
-  [Palette, "Graphic Design", "Visual identity, branding, and marketing materials that communicate clearly."],
-  [Smartphone, "Social Media Content", "Short-form strategy and production tailored for every platform."],
-] as const;
+const serviceItems: BentoItem[] = [
+  {
+    title: "Videography",
+    meta: "Motion",
+    description: "Cinematic production for brands, events, documentaries, and campaigns with clear story direction.",
+    icon: <Video className="h-5 w-5" strokeWidth={1.5} />,
+    status: "Core",
+    tags: ["Campaign", "Event", "Story"],
+    cta: "Book video ->",
+    colSpan: 2,
+    hasPersistentHover: true,
+  },
+  {
+    title: "Photography",
+    meta: "Still",
+    description: "Commercial, portrait, product, and event photography shaped around strong visual intent.",
+    icon: <Camera className="h-5 w-5" strokeWidth={1.5} />,
+    status: "Ready",
+    tags: ["Portrait", "Product"],
+    cta: "Plan shoot ->",
+  },
+  {
+    title: "Graphic Design",
+    meta: "Visual",
+    description: "Visual identity, branding, and marketing materials that make the message easier to understand.",
+    icon: <Palette className="h-5 w-5" strokeWidth={1.5} />,
+    status: "Studio",
+    tags: ["Branding", "Layout", "Assets"],
+    cta: "Design brief ->",
+    colSpan: 2,
+  },
+  {
+    title: "Social Media Content",
+    meta: "Short-form",
+    description: "Platform-ready content systems for feeds, reels, stories, and campaigns that need consistency.",
+    icon: <Smartphone className="h-5 w-5" strokeWidth={1.5} />,
+    status: "Monthly",
+    tags: ["Reels", "Feeds"],
+    cta: "Build content ->",
+  },
+];
 
 const process = [
   [BriefcaseBusiness, "01", "Discover", "We discuss your goals, audience, and key message."],
@@ -280,22 +316,7 @@ export default function Home() {
 
           <section id="services" className="scroll-mt-24">
             <SectionIntro eyebrow="Services" title="One creative partner from concept to final delivery." text="Clear lanes make it easier for clients to understand what to book, what they get, and where each deliverable lives." />
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              {services.map(([Icon, title, text]) => (
-                <article key={title} className="group rounded-[1.25rem] border border-white/10 bg-white/[0.02] p-6 transition duration-500 hover:-translate-y-0.5 hover:border-white/22 hover:bg-white/[0.035]">
-                  <div className="flex items-start gap-5">
-                    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-white/10 text-white/68 transition group-hover:text-white">
-                      <Icon className="h-6 w-6" strokeWidth={1.5} />
-                    </span>
-                    <div>
-                      <h2 className="font-display text-xl font-semibold text-white">{title}</h2>
-                      <p className="mt-3 text-sm leading-6 text-white/55">{text}</p>
-                      <a href="#contact" className="mt-5 inline-flex items-center gap-2 text-xs font-semibold text-[#d4a454]">Learn more <ArrowRight className="h-3.5 w-3.5" /></a>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
+            <BentoGrid items={serviceItems} />
           </section>
 
           <section id="work" className="scroll-mt-24">
