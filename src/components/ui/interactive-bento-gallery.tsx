@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { Grip, Image as ImageIcon, Play, Video, X } from "lucide-react";
+import { Image as ImageIcon, Play, Video, X } from "lucide-react";
 
 export interface BentoGalleryItem {
   id: number;
@@ -263,17 +263,13 @@ export default function InteractiveBentoGallery({
   };
 
   return (
-    <div className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#0c1010] p-4 shadow-2xl shadow-black/20 sm:p-5 lg:p-6">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(117,183,187,0.12),transparent_34%),radial-gradient(circle_at_78%_18%,rgba(212,164,84,0.14),transparent_36%)]" />
-      <div className="relative mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <div className="relative">
+      <div className="pointer-events-none absolute inset-x-[-1.5rem] top-[-4rem] h-80 bg-[radial-gradient(circle_at_20%_0%,rgba(117,183,187,0.1),transparent_36%),radial-gradient(circle_at_78%_18%,rgba(212,164,84,0.11),transparent_38%)]" />
+      <div className="relative mb-6">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#d4a454]">Interactive gallery</p>
           <h3 className="mt-3 font-display text-3xl font-light leading-tight text-white md:text-5xl">{title}</h3>
           <p className="mt-3 max-w-2xl text-sm leading-7 text-white/55">{description}</p>
-        </div>
-        <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-xs text-white/54">
-          <Grip className="h-3.5 w-3.5" />
-          Drag to reorder
         </div>
       </div>
 
