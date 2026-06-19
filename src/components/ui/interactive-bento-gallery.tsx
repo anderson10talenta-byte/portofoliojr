@@ -264,7 +264,6 @@ export default function InteractiveBentoGallery({
 
   return (
     <div className="relative">
-      <div className="pointer-events-none absolute inset-x-[-1.5rem] top-[-4rem] h-80 bg-[radial-gradient(circle_at_20%_0%,rgba(117,183,187,0.1),transparent_36%),radial-gradient(circle_at_78%_18%,rgba(212,164,84,0.11),transparent_38%)]" />
       <div className="relative mb-6">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#d4a454]">Interactive gallery</p>

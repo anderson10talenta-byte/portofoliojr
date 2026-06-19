@@ -107,7 +107,7 @@ function toBentoGalleryItems(items: Media[]): BentoGalleryItem[] {
     title: item.title,
     desc: item.description || "Purposeful visual story for modern brands.",
     url: item.url,
-    thumbnailUrl: item.thumbnailUrl || item.galleryUrls?.[0] || item.url,
+    thumbnailUrl: item.thumbnailUrl || item.galleryUrls?.[0] || (item.type === "video" ? asset("about-portrait.png") : item.url),
     span: bentoSpans[index % bentoSpans.length],
     category: item.category,
   }));
@@ -324,7 +324,7 @@ export default function Home() {
               <InteractiveBentoGallery
                 mediaItems={filteredBentoItems}
                 title={filter === "All" ? "A living wall of recent work." : `${filter} stories in motion.`}
-                description="Drag, scan, and tap into the work. The gallery keeps the portfolio tactile without losing the clean editorial feel."
+                description="Scan, tap, and explore the work. The gallery keeps the portfolio tactile without losing the clean editorial feel."
                 onItemOpen={openBentoMedia}
               />
             ) : (
