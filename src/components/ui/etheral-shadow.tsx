@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useId, useEffect, type CSSProperties } from 'react';
-import { animate, useMotionValue, type AnimationPlaybackControls } from 'framer-motion';
+import { animate, useMotionValue, useReducedMotion, type AnimationPlaybackControls } from 'framer-motion';
 
 interface ResponsiveImage {
   src: string;
@@ -59,7 +59,8 @@ export function Component({
   className,
 }: ShadowOverlayProps) {
   const id = useInstanceId();
-  const animationEnabled = Boolean(animation && animation.scale > 0);
+  const shouldReduceMotion = useReducedMotion();
+  const animationEnabled = Boolean(animation && animation.scale > 0 && !shouldReduceMotion);
   const feColorMatrixRef = useRef<SVGFEColorMatrixElement>(null);
   const hueRotateMotionValue = useMotionValue(180);
   const hueRotateAnimation = useRef<AnimationPlaybackControls | null>(null);
@@ -113,7 +114,7 @@ export function Component({
         {animationEnabled && (
           <svg style={{ position: 'absolute', width: 0, height: 0 }}>
             <defs>
-              <filter id={id}>
+              <filter id={id} x="-30%" y="-30%" width="160%" height="160%">
                 <feTurbulence
                   result="undulation"
                   numOctaves="2"
@@ -158,8 +159,8 @@ export function Component({
           backgroundRepeat: 'no-repeat',
           backgroundPosition: 'center',
           backgroundBlendMode: 'screen',
-          filter: 'blur(10px)',
-          opacity: 0.48,
+          filter: 'blur(12px)',
+          opacity: animationEnabled ? 0.24 : 0.48,
         }}
       />
 

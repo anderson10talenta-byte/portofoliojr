@@ -234,15 +234,15 @@ export default function Home() {
         <section id="top" className="relative min-h-[760px] overflow-hidden md:min-h-[860px]">
           <div className="absolute inset-0 bg-[linear-gradient(90deg,#080a0a_0%,#0b0f0f_58%,#0d1010_100%)]" />
           <EtheralShadow
-            className="absolute inset-0 opacity-70"
-            color="rgba(212, 164, 84, 0.78)"
-            animation={{ scale: 96, speed: 72 }}
-            noise={{ opacity: 0.3, scale: 1 }}
+            className="pointer-events-none absolute inset-0 opacity-90"
+            color="rgba(196, 148, 75, 0.82)"
+            animation={{ scale: 88, speed: 68 }}
+            noise={{ opacity: 0.2, scale: 1 }}
             sizing="fill"
             showTitle={false}
           />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_68%_30%,rgba(117,183,187,0.22),transparent_32%),radial-gradient(circle_at_30%_62%,rgba(212,164,84,0.2),transparent_38%)]" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#080a0a]/85 via-[#080a0a]/48 to-[#080a0a]/78" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_26%,rgba(117,183,187,0.2),transparent_30%),radial-gradient(circle_at_28%_66%,rgba(212,164,84,0.14),transparent_38%)]" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#080a0a]/88 via-[#080a0a]/36 to-[#080a0a]/68" />
           <div className="absolute inset-x-0 bottom-0 h-px bg-white/10" />
           <div className="relative mx-auto grid min-h-[760px] max-w-[1440px] items-center gap-16 px-6 pb-16 pt-28 md:min-h-[860px] md:px-12 lg:grid-cols-[1.06fr_0.94fr] lg:px-20">
             <motion.div initial={{ opacity: 0, y: 25 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }} className="max-w-[760px]">
