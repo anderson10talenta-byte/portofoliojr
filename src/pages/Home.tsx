@@ -371,21 +371,64 @@ export default function Home() {
                 <p className="mt-4 max-w-2xl text-base leading-8 text-white/52">With 5+ years of experience, I combine creativity with strategy to deliver content that looks good and works hard.</p>
               </div>
             </div>
-            <div className="mt-14">
-              <h3 className="font-display text-3xl font-light text-white md:text-4xl">Work Experience</h3>
-              <div className="mt-8 border-l border-[#75b7bb]/55 pl-7 md:pl-9">
-                {workExperience.map((experience, index) => (
-                  <article key={`${experience.period}-${experience.company}`} className="relative grid gap-3 border-b border-white/8 py-7 first:pt-0 last:border-b-0 last:pb-0 md:grid-cols-[180px_1fr] md:gap-8">
-                    <span className={`absolute -left-[32px] h-2.5 w-2.5 rounded-full border-2 border-[#0b0f0f] bg-[#75b7bb] md:-left-[40px] ${index === 0 ? "top-1" : "top-8"}`} />
-                    <p className="text-sm font-medium text-[#75b7bb]">{experience.period}</p>
-                    <div>
-                      <h4 className="text-base font-semibold text-white">{experience.role}</h4>
-                      <p className="mt-1 text-sm text-[#d4a454]">{experience.company}</p>
-                      <p className="mt-3 max-w-3xl text-sm leading-7 text-white/52">{experience.description}</p>
-                    </div>
-                  </article>
-                ))}
+            <div className="mt-20 grid gap-10 border-t border-white/10 pt-12 lg:grid-cols-[0.72fr_1.28fr] lg:gap-16 lg:pt-16">
+              <div className="lg:sticky lg:top-28 lg:self-start">
+                <p className="section-label">Career Timeline</p>
+                <h3 className="mt-5 max-w-md font-display text-4xl font-light leading-[1.08] text-white md:text-5xl">
+                  Experience built through real creative work.
+                </h3>
+                <p className="mt-5 max-w-md text-base leading-7 text-white/55">
+                  From independent production to in-house creative teams, each role sharpened the balance between visual craft, strategy, and delivery.
+                </p>
+                <div className="mt-8 flex flex-wrap gap-2" aria-label="Career summary">
+                  <span className="rounded-full border border-white/10 px-4 py-2 text-xs text-white/60">7 roles</span>
+                  <span className="rounded-full border border-white/10 px-4 py-2 text-xs text-white/60">5+ years</span>
+                  <span className="rounded-full border border-[#75b7bb]/25 px-4 py-2 text-xs text-[#75b7bb]">Creative &amp; social</span>
+                </div>
               </div>
+
+              <ol className="relative border-l border-white/10 pl-5 sm:pl-8" aria-label="Work experience timeline">
+                {workExperience.map((experience, index) => {
+                  const isCurrent = experience.period.includes("Present");
+
+                  return (
+                    <li key={`${experience.period}-${experience.company}`} className="group relative pb-4 last:pb-0">
+                      <span
+                        aria-hidden="true"
+                        className={`absolute -left-[25px] top-8 h-2 w-2 rounded-full ring-4 ring-[#080a0a] transition-colors duration-300 sm:-left-[37px] ${isCurrent ? "bg-[#d4a454]" : "bg-[#75b7bb]/55 group-hover:bg-[#75b7bb]"}`}
+                      />
+                      <article className={`relative overflow-hidden rounded-[1.15rem] border p-5 transition duration-300 sm:p-7 ${isCurrent ? "border-[#d4a454]/25 bg-[#d4a454]/[0.045]" : "border-white/8 bg-white/[0.018] hover:border-white/16 hover:bg-white/[0.03]"}`}>
+                        <div className="flex flex-wrap items-start justify-between gap-4">
+                          <div className="flex items-center gap-3">
+                            <span className="font-mono text-[10px] tracking-[0.16em] text-white/28">{String(index + 1).padStart(2, "0")}</span>
+                            <span className="h-px w-7 bg-white/12" />
+                            <p className="inline-flex items-center gap-2 text-xs font-medium text-[#75b7bb]">
+                              <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" />
+                              {experience.period}
+                            </p>
+                          </div>
+                          {isCurrent && (
+                            <span className="inline-flex items-center gap-2 rounded-full border border-[#d4a454]/25 bg-[#d4a454]/10 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.14em] text-[#e1b86f]">
+                              <span className="h-1.5 w-1.5 rounded-full bg-[#d4a454]" /> Current
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="mt-6 grid gap-4 sm:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] sm:gap-8">
+                          <div>
+                            <h4 className="text-lg font-semibold leading-snug text-white sm:text-xl">{experience.role}</h4>
+                            <p className="mt-2 inline-flex items-center gap-2 text-sm text-[#d4a454]">
+                              <BriefcaseBusiness className="h-4 w-4" aria-hidden="true" />
+                              {experience.company}
+                            </p>
+                          </div>
+                          <p className="text-sm leading-7 text-white/58">{experience.description}</p>
+                        </div>
+                      </article>
+                    </li>
+                  );
+                })}
+              </ol>
             </div>
           </section>
 
