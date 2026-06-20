@@ -381,9 +381,9 @@ export default function Home() {
                   From independent production to in-house creative teams, each role sharpened the balance between visual craft, strategy, and delivery.
                 </p>
                 <div className="mt-8 flex flex-wrap gap-2" aria-label="Career summary">
-                  <span className="rounded-full border border-white/10 px-4 py-2 text-xs text-white/60">7 roles</span>
+                  <span className="rounded-full border border-white/10 px-4 py-2 text-xs text-white/60">{workExperience.length} work experiences</span>
                   <span className="rounded-full border border-white/10 px-4 py-2 text-xs text-white/60">5+ years</span>
-                  <span className="rounded-full border border-[#75b7bb]/25 px-4 py-2 text-xs text-[#75b7bb]">Creative &amp; social</span>
+                  <span className="rounded-full border border-[#75b7bb]/25 px-4 py-2 text-xs text-[#75b7bb]">Social, photo &amp; video</span>
                 </div>
               </div>
 
